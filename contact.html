@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact | Jeel AI Consulting</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <a href="index.html" class="brand">
+          <span class="brand-icon">JG</span>
+          Jeel AI Consulting
+        </a>
+        <nav class="site-nav" aria-label="Main">
+          <a href="index.html">Home</a>
+          <a href="services.html">Services</a>
+          <a href="about.html">About</a>
+          <a href="contact.html" class="active">Contact</a>
+        </nav>
+        <div class="header-cta">
+          <a href="contact.html" class="btn btn-primary">Get in touch</a>
+          <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="page-hero">
+        <div class="container">
+          <p class="eyebrow">Contact</p>
+          <h1>Book a consult or send a message</h1>
+          <p class="lead lead-center">
+            Fill out the form below or reach me directly. I respond within 1–2
+            business days.
+          </p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container contact-layout">
+          <div class="contact-sidebar">
+            <h2>Direct contact</h2>
+            <p>
+              Prefer email or a quick call? Use the details below — same response
+              time as the form.
+            </p>
+            <div class="info-box">
+              <div class="info-row">
+                <span class="info-label">Email</span>
+                <a href="mailto:jeelgondaliya@gmail.com?subject=AI%20Consulting%20Inquiry"
+                  >jeelgondaliya@gmail.com</a
+                >
+              </div>
+              <div class="info-row">
+                <span class="info-label">Phone / WhatsApp</span>
+                <a href="tel:+917828820453">+91 78288 20453</a>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Typical response</span>
+                <span>1–2 business days</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="contact-form-wrap">
+            <form
+              id="contact-form"
+              method="POST"
+              action="https://formspree.io/f/xykvbpon"
+            >
+              <div class="form-row">
+                <div class="field">
+                  <label for="name">Name</label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="Your name"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="email">Email</label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="you@company.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="field">
+                  <label for="company">Company (optional)</label>
+                  <input
+                    type="text"
+                    id="company"
+                    name="company"
+                    placeholder="Company or team"
+                  />
+                </div>
+                <div class="field">
+                  <label for="budget">Budget (optional)</label>
+                  <select id="budget" name="budget">
+                    <option value="">Select range</option>
+                    <option value="<2k">&lt; $2k</option>
+                    <option value="2k-5k">$2k – $5k</option>
+                    <option value="5k-15k">$5k – $15k</option>
+                    <option value=">15k">&gt; $15k</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Interested in</label>
+                <div class="checkbox-group">
+                  <label class="checkbox-pill">
+                    <input type="checkbox" name="focus" value="LLM / chatbot" />
+                    LLM / chatbot
+                  </label>
+                  <label class="checkbox-pill">
+                    <input type="checkbox" name="focus" value="Internal AI tools" />
+                    Internal AI tools
+                  </label>
+                  <label class="checkbox-pill">
+                    <input type="checkbox" name="focus" value="Analytics" />
+                    Analytics
+                  </label>
+                  <label class="checkbox-pill">
+                    <input type="checkbox" name="focus" value="Forecasting" />
+                    Forecasting
+                  </label>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="message">Message</label>
+                <textarea
+                  id="message"
+                  name="message"
+                  rows="5"
+                  placeholder="What are you trying to achieve? Timeline?"
+                  required
+                ></textarea>
+              </div>
+
+              <input
+                type="hidden"
+                name="_subject"
+                value="New inquiry from Jeel AI website"
+              />
+
+              <button type="submit" class="btn btn-primary full-width">
+                Send message
+              </button>
+              <p class="form-footnote">
+                Submissions are sent to jeelgondaliya@gmail.com. I never share
+                your details.
+              </p>
+              <p id="form-status" class="form-status" aria-live="polite"></p>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <a href="index.html" class="brand">
+              <span class="brand-icon">JG</span>
+              Jeel AI Consulting
+            </a>
+            <p>
+              Independent consulting for LLM products, analytics, and forecasting.
+            </p>
+          </div>
+          <div class="footer-col">
+            <h4>Pages</h4>
+            <a href="index.html">Home</a>
+            <a href="services.html">Services</a>
+            <a href="about.html">About</a>
+            <a href="contact.html">Contact</a>
+          </div>
+          <div class="footer-col">
+            <h4>Contact</h4>
+            <a href="mailto:jeelgondaliya@gmail.com">jeelgondaliya@gmail.com</a>
+            <a href="tel:+917828820453">+91 78288 20453</a>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>© <span id="year"></span> Jeel Gondaliya</span>
+          <span>LLM · Analytics · Forecasting</span>
+        </div>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

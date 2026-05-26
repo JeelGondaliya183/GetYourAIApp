@@ -1,1965 +1,220 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Therapist Portal</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #0a0e27;
-            color: #e4e4e7;
-            min-height: 100vh;
-        }
-        
-        .app-container {
-            display: flex;
-            min-height: 100vh;
-            max-height: 100vh;
-        }
-        
-        /* Sidebar Styles */
-        .sidebar {
-            width: 320px;
-            background: linear-gradient(180deg, #1a1f3a 0%, #0f1729 100%);
-            border-right: 1px solid rgba(139, 92, 246, 0.1);
-            display: flex;
-            flex-direction: column;
-            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
-        }
-        
-        .sidebar-header {
-            padding: 32px 24px;
-            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .sidebar-header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: float 8s ease-in-out infinite;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            50% { transform: translate(-20px, -20px) rotate(180deg); }
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .logo-icon {
-            width: 48px;
-            height: 48px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            backdrop-filter: blur(10px);
-        }
-        
-        .logo-text h1 {
-            font-size: 24px;
-            font-weight: 700;
-            color: white;
-        }
-        
-        .logo-text p {
-            font-size: 13px;
-            color: rgba(255,255,255,0.8);
-            margin-top: 2px;
-        }
-        
-        .search-container {
-            padding: 20px 24px;
-        }
-        
-        .search-box {
-            width: 100%;
-            padding: 14px 16px 14px 44px;
-            background: rgba(139, 92, 246, 0.1);
-            border: 1px solid rgba(139, 92, 246, 0.2);
-            border-radius: 12px;
-            color: #e4e4e7;
-            font-size: 14px;
-            outline: none;
-            transition: all 0.3s;
-            position: relative;
-        }
-        
-        .search-wrapper {
-            position: relative;
-        }
-        
-        .search-icon {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #8b5cf6;
-            font-size: 16px;
-        }
-        
-        .search-box:focus {
-            background: rgba(139, 92, 246, 0.15);
-            border-color: #8b5cf6;
-            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
-        }
-        
-        .client-list-container {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 0 16px 20px 16px;
-            max-height: calc(100vh - 240px);
-        }
-        
-        .client-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        
-        .client-item {
-            padding: 16px;
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid rgba(139, 92, 246, 0.1);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .client-item::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            width: 3px;
-            background: linear-gradient(180deg, #8b5cf6 0%, #6366f1 100%);
-            transform: scaleY(0);
-            transition: transform 0.3s;
-        }
-        
-        .client-item:hover {
-            background: rgba(30, 41, 59, 0.8);
-            border-color: rgba(139, 92, 246, 0.3);
-            transform: translateX(4px);
-        }
-        
-        .client-item:hover::before {
-            transform: scaleY(1);
-        }
-        
-        .client-item.active {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(99, 102, 241, 0.2) 100%);
-            border-color: #8b5cf6;
-        }
-        
-        .client-item.active::before {
-            transform: scaleY(1);
-        }
-        
-        .client-name {
-            font-weight: 600;
-            font-size: 15px;
-            margin-bottom: 6px;
-            color: #f3f4f6;
-        }
-        
-        .client-next-session {
-            font-size: 13px;
-            color: #9ca3af;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        /* Main Content Styles */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        
-        .top-bar {
-            padding: 24px 40px;
-            background: rgba(26, 31, 58, 0.8);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(139, 92, 246, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .client-header h2 {
-            font-size: 28px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .client-header p {
-            font-size: 14px;
-            color: #9ca3af;
-            margin-top: 4px;
-        }
-        
-        .quick-actions {
-            display: flex;
-            gap: 12px;
-        }
-        
-        .action-btn {
-            padding: 10px 20px;
-            background: rgba(139, 92, 246, 0.1);
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            border-radius: 10px;
-            color: #e4e4e7;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .action-btn:hover {
-            background: rgba(139, 92, 246, 0.2);
-            transform: translateY(-2px);
-        }
-        
-        .content-area {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 32px 40px;
-            max-height: calc(100vh - 100px);
-        }
-        
-        .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 32px;
-            background: rgba(30, 41, 59, 0.5);
-            padding: 8px;
-            border-radius: 16px;
-            border: 1px solid rgba(139, 92, 246, 0.1);
-        }
-        
-        .tab {
-            padding: 12px 24px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            color: #9ca3af;
-            border-radius: 10px;
-            transition: all 0.3s;
-            position: relative;
-        }
-        
-        .tab:hover {
-            color: #e4e4e7;
-            background: rgba(139, 92, 246, 0.1);
-        }
-        
-        .tab.active {
-            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-        }
-        
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.4s;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* Summary Cards */
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-        
-        .stat-card {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
-            border: 1px solid rgba(139, 92, 246, 0.2);
-            border-radius: 20px;
-            padding: 28px;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s;
-        }
-        
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        
-        .stat-card:hover::before {
-            opacity: 1;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 32px rgba(139, 92, 246, 0.2);
-        }
-        
-        .stat-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-        
-        .stat-card h3 {
-            font-size: 14px;
-            color: #9ca3af;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .stat-value {
-            font-size: 32px;
-            font-weight: 700;
-            color: #f3f4f6;
-            margin-bottom: 8px;
-        }
-        
-        .stat-description {
-            font-size: 14px;
-            color: #9ca3af;
-            line-height: 1.5;
-        }
-        
-        .insights-section {
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid rgba(139, 92, 246, 0.1);
-            border-radius: 20px;
-            padding: 32px;
-            margin-bottom: 24px;
-        }
-        
-        .insights-section h3 {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .insight-item {
-            background: rgba(139, 92, 246, 0.05);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            border-left: 3px solid #8b5cf6;
-        }
-        
-        .insight-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-        
-        .insight-type {
-            font-weight: 600;
-            color: #8b5cf6;
-            font-size: 14px;
-        }
-        
-        .insight-date {
-            font-size: 12px;
-            color: #9ca3af;
-        }
-        
-        .insight-text {
-            color: #d1d5db;
-            line-height: 1.6;
-            font-size: 14px;
-        }
-        
-        .key-themes {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 16px;
-        }
-        
-        .theme-tag {
-            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 500;
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-        }
-        
-        /* Visualization */
-        .chart-container {
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid rgba(139, 92, 246, 0.1);
-            border-radius: 20px;
-            padding: 32px;
-            margin-bottom: 24px;
-        }
-        
-        .chart-container h3 {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 24px;
-            color: #f3f4f6;
-        }
-        
-        /* Notes Section */
-        .add-note-section {
-            background: rgba(30, 41, 59, 0.5);
-            border: 2px dashed rgba(139, 92, 246, 0.3);
-            border-radius: 20px;
-            padding: 32px;
-            margin-bottom: 32px;
-        }
-        
-        .add-note-section h3 {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        textarea {
-            width: 100%;
-            min-height: 150px;
-            padding: 16px;
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(139, 92, 246, 0.2);
-            border-radius: 12px;
-            color: #e4e4e7;
-            font-size: 14px;
-            font-family: inherit;
-            resize: vertical;
-            outline: none;
-            transition: all 0.3s;
-        }
-        
-        textarea:focus {
-            border-color: #8b5cf6;
-            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 12px;
-            margin-top: 16px;
-        }
-        
-        .btn {
-            padding: 14px 28px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
-        }
-        
-        .btn-audio {
-            background: rgba(239, 68, 68, 0.2);
-            color: #f87171;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-        
-        .btn-audio:hover {
-            background: rgba(239, 68, 68, 0.3);
-        }
-        
-        .btn-audio.recording {
-            background: rgba(34, 197, 94, 0.2);
-            color: #4ade80;
-            border-color: rgba(34, 197, 94, 0.3);
-            animation: pulse 1.5s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-        
-        .session-note {
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid rgba(139, 92, 246, 0.1);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 16px;
-            transition: all 0.3s;
-        }
-        
-        .session-note:hover {
-            border-color: rgba(139, 92, 246, 0.3);
-            transform: translateX(4px);
-        }
-        
-        .session-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        
-        .session-date {
-            font-weight: 600;
-            color: #8b5cf6;
-            font-size: 15px;
-        }
-        
-        .note-content {
-            color: #d1d5db;
-            line-height: 1.7;
-            font-size: 14px;
-        }
-        
-        /* Chatbot Summary */
-        .chat-summary-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-        
-        .date-selector {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-        
-        .date-btn {
-            padding: 10px 20px;
-            background: rgba(139, 92, 246, 0.1);
-            border: 1px solid rgba(139, 92, 246, 0.2);
-            border-radius: 10px;
-            color: #e4e4e7;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 13px;
-        }
-        
-        .date-btn:hover {
-            background: rgba(139, 92, 246, 0.2);
-        }
-        
-        .date-btn.active {
-            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-            border-color: transparent;
-        }
-        
-        .chat-summary-card {
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid rgba(139, 92, 246, 0.1);
-            border-radius: 20px;
-            padding: 28px;
-            margin-bottom: 24px;
-        }
-        
-        .summary-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid rgba(139, 92, 246, 0.1);
-        }
-        
-        .summary-period {
-            font-weight: 600;
-            color: #8b5cf6;
-            font-size: 16px;
-        }
-        
-        .message-count {
-            font-size: 13px;
-            color: #9ca3af;
-        }
-        
-        .sentiment-indicator {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-        
-        .sentiment-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #4ade80;
-        }
-        
-        .sentiment-dot.neutral {
-            background: #fbbf24;
-        }
-        
-        .sentiment-dot.negative {
-            background: #f87171;
-        }
-        
-        .summary-content {
-            margin-top: 20px;
-        }
-        
-        .summary-section {
-            margin-bottom: 24px;
-        }
-        
-        .summary-section h4 {
-            font-size: 15px;
-            color: #8b5cf6;
-            margin-bottom: 12px;
-            font-weight: 600;
-        }
-        
-        .summary-text {
-            color: #d1d5db;
-            line-height: 1.7;
-            font-size: 14px;
-        }
-        
-        .daily-entries {
-            display: grid;
-            gap: 16px;
-            margin-top: 20px;
-        }
-        
-        .daily-entry {
-            background: rgba(15, 23, 42, 0.5);
-            padding: 20px;
-            border-radius: 12px;
-            border-left: 3px solid #6366f1;
-        }
-        
-        .daily-entry-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-        
-        .daily-date {
-            font-weight: 600;
-            color: #6366f1;
-            font-size: 14px;
-        }
-        
-        .mood-emoji {
-            font-size: 20px;
-        }
-        
-        .daily-summary {
-            color: #d1d5db;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        
-        /* Calendar */
-        .calendar {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 12px;
-        }
-        
-        .calendar-day {
-            aspect-ratio: 1;
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid rgba(139, 92, 246, 0.1);
-            border-radius: 12px;
-            padding: 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .calendar-day:hover {
-            transform: scale(1.05);
-            border-color: rgba(139, 92, 246, 0.3);
-        }
-        
-        .calendar-day.has-data {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(99, 102, 241, 0.2) 100%);
-            border-color: #8b5cf6;
-        }
-        
-        .day-label {
-            font-size: 11px;
-            color: #9ca3af;
-            margin-bottom: 4px;
-        }
-        
-        .day-mood {
-            font-size: 28px;
-            margin: 4px 0;
-        }
-        
-        .day-date {
-            font-size: 12px;
-            color: #9ca3af;
-            margin-top: 4px;
-        }
-        
-        .welcome-message {
-            text-align: center;
-            padding: 100px 20px;
-        }
-        
-        .welcome-icon {
-            font-size: 80px;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-        
-        .welcome-message h2 {
-            font-size: 32px;
-            margin-bottom: 12px;
-            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .welcome-message p {
-            color: #9ca3af;
-            font-size: 16px;
-        }
-        
-        .appointment-reminder {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-            border-left: 4px solid #f59e0b;
-            padding: 24px;
-            border-radius: 16px;
-            margin-bottom: 24px;
-        }
-        
-        .reminder-title {
-            font-weight: 600;
-            color: #fbbf24;
-            margin-bottom: 12px;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .reminder-title::before {
-            content: '⏰';
-            font-size: 20px;
-        }
-        
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.5);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: rgba(139, 92, 246, 0.3);
-            border-radius: 10px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(139, 92, 246, 0.5);
-        }
-        
-        canvas {
-            max-width: 100%;
-        }
-        
-        .comparison-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 24px;
-            margin-top: 24px;
-        }
-        
-        .mini-chart {
-            background: rgba(15, 23, 42, 0.5);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid rgba(139, 92, 246, 0.1);
-        }
-        
-        .mini-chart h4 {
-            font-size: 14px;
-            color: #9ca3af;
-            margin-bottom: 16px;
-            text-align: center;
-        }
-    </style>
-</head>
-<body>
-    <div class="app-container">
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <div class="logo-icon">🧠</div>
-                    <div class="logo-text">
-                        <h1>TherapyHub</h1>
-                        <p>Client Management</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="search-container">
-                <div class="search-wrapper">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" class="search-box" id="searchBox" placeholder="Search clients...">
-                </div>
-            </div>
-            
-            <div class="client-list-container">
-                <ul class="client-list" id="clientList"></ul>
-            </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jeel Gondaliya | AI Consulting</title>
+    <meta
+      name="description"
+      content="AI consulting for LLM products, analytics, and forecasting. Practical solutions from idea to production."
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <a href="index.html" class="brand">
+          <span class="brand-icon">JG</span>
+          Jeel AI Consulting
+        </a>
+        <nav class="site-nav" aria-label="Main">
+          <a href="index.html" class="active">Home</a>
+          <a href="services.html">Services</a>
+          <a href="about.html">About</a>
+          <a href="contact.html">Contact</a>
+        </nav>
+        <div class="header-cta">
+          <a href="contact.html" class="btn btn-primary">Get in touch</a>
+          <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false">
+            <span></span><span></span><span></span>
+          </button>
         </div>
-        
-        <div class="main-content">
-            <div id="welcomeScreen" class="content-area">
-                <div class="welcome-message">
-                    <div class="welcome-icon">👋</div>
-                    <h2>Welcome to TherapyHub</h2>
-                    <p>Select a client from the sidebar to view their information</p>
-                </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container">
+          <p class="eyebrow">AI & Data Consulting</p>
+          <h1>AI-powered solutions for teams that need results, not hype</h1>
+          <p class="lead lead-center">
+            I help businesses design, build, and ship practical AI — large language
+            models, analytics dashboards, and prediction forecasting — from first
+            conversation to production.
+          </p>
+          <div class="hero-actions">
+            <a href="contact.html" class="btn btn-primary btn-lg">Book a free consult</a>
+            <a href="services.html" class="btn btn-outline btn-lg">View services</a>
+          </div>
+          <div class="hero-visual">
+            <div class="hero-mock">
+              <div class="mock-panel">
+                <h4>LLM workflow</h4>
+                <div class="mock-bar accent"></div>
+                <div class="mock-bar short"></div>
+                <div class="mock-bar"></div>
+                <p style="margin:12px 0 0;font-size:0.8125rem;color:var(--text-muted)">
+                  RAG · Copilots · Automation
+                </p>
+              </div>
+              <div class="mock-panel">
+                <h4>Forecast</h4>
+                <div class="mock-bar"></div>
+                <div class="mock-bar accent"></div>
+                <div class="mock-bar short"></div>
+                <p style="margin:12px 0 0;font-size:0.8125rem;color:var(--text-muted)">
+                  Analytics · KPIs · Scenarios
+                </p>
+              </div>
             </div>
-            
-            <div id="clientContent" style="display: none;">
-                <div class="top-bar">
-                    <div class="client-header">
-                        <h2 id="clientName">Client Name</h2>
-                        <p id="clientSubtitle">View and manage client information</p>
-                    </div>
-                </div>
-                
-                <div class="content-area">
-                    <div id="appointmentReminder"></div>
-                    
-                    <div class="tabs">
-                        <button class="tab active" onclick="switchTab('summary')">📊 Overview</button>
-                        <button class="tab" onclick="switchTab('chatbot')">💬 Chat Summary</button>
-                        <button class="tab" onclick="switchTab('notes')">📝 Session Notes</button>
-                        <button class="tab" onclick="switchTab('visualization')">📈 Analytics</button>
-                        <button class="tab" onclick="switchTab('logs')">📅 Mood Calendar</button>
-                    </div>
-                    
-                    <div id="summary" class="tab-content active">
-                        <div class="summary-grid">
-                            <div class="stat-card">
-                                <div class="stat-header">
-                                    <div class="stat-icon">📅</div>
-                                    <h3>Next Session</h3>
-                                </div>
-                                <div class="stat-value" id="nextSessionDate">-</div>
-                                <div class="stat-description" id="nextSessionTime">-</div>
-                            </div>
-                            
-                            <div class="stat-card">
-                                <div class="stat-header">
-                                    <div class="stat-icon">📈</div>
-                                    <h3>Progress Score</h3>
-                                </div>
-                                <div class="stat-value">7.8<span style="font-size: 16px; color: #4ade80;">/10</span></div>
-                                <div class="stat-description">Showing consistent improvement</div>
-                            </div>
-                            
-                            <div class="stat-card">
-                                <div class="stat-header">
-                                    <div class="stat-icon">💬</div>
-                                    <h3>Chat Activity</h3>
-                                </div>
-                                <div class="stat-value" id="chatMessageCount">-</div>
-                                <div class="stat-description">Messages since last session</div>
-                            </div>
-                        </div>
-                        
-                        <div class="insights-section">
-                            <h3>🎯 Key Insights</h3>
-                            
-                            <div class="insight-item">
-                                <div class="insight-header">
-                                    <span class="insight-type">Session Summary</span>
-                                    <span class="insight-date" id="lastSessionDate">-</span>
-                                </div>
-                                <div class="insight-text" id="sessionInsight">-</div>
-                            </div>
-                            
-                            <div class="insight-item">
-                                <div class="insight-header">
-                                    <span class="insight-type">Chat Summary</span>
-                                    <span class="insight-date">Between sessions</span>
-                                </div>
-                                <div class="insight-text" id="chatInsight">-</div>
-                            </div>
-                        </div>
-                        
-                        <div class="insights-section">
-                            <h3>🏷️ Treatment Themes</h3>
-                            <div class="key-themes" id="keyThemes"></div>
-                        </div>
-                        
-                        <div class="comparison-grid">
-                            <div class="mini-chart">
-                                <h4>Session Progress Trend</h4>
-                                <canvas id="miniSessionChart"></canvas>
-                            </div>
-                            <div class="mini-chart">
-                                <h4>Daily Mood Trend</h4>
-                                <canvas id="miniMoodChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div id="chatbot" class="tab-content">
-                        <div class="chat-summary-header">
-                            <h3 style="font-size: 24px; font-weight: 600;">💬 AI Chat Summary</h3>
-                            <div class="date-selector">
-                                <button class="date-btn active" onclick="loadChatSummary('current')">Current Period</button>
-                                <button class="date-btn" onclick="loadChatSummary('previous')">Previous Period</button>
-                                <button class="date-btn" onclick="showChatHistory()">History</button>
-                            </div>
-                        </div>
-                        
-                        <div id="currentChatSummary">
-                            <div class="chat-summary-card">
-                                <div class="summary-meta">
-                                    <div>
-                                        <div class="summary-period" id="chatPeriod">Oct 4 - Oct 11, 2025</div>
-                                        <div class="message-count" id="chatCount">45 messages exchanged</div>
-                                    </div>
-                                    <div class="sentiment-indicator">
-                                        <span class="sentiment-dot"></span>
-                                        <span style="font-size: 13px; color: #4ade80;">Positive trend</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="summary-content">
-                                    <div class="summary-section">
-                                        <h4>📋 Overall Summary</h4>
-                                        <p class="summary-text" id="chatOverallSummary">
-                                            Patient has been actively engaging with the AI chatbot, discussing daily stressors and practicing coping techniques. Notable improvement in emotional regulation and self-awareness. Patient reports feeling more in control and has been consistently using breathing exercises during anxious moments.
-                                        </p>
-                                    </div>
-                                    
-                                    <div class="summary-section">
-                                        <h4>🎯 Key Topics Discussed</h4>
-                                        <div class="key-themes">
-                                            <span class="theme-tag">Work Stress</span>
-                                            <span class="theme-tag">Sleep Quality</span>
-                                            <span class="theme-tag">Anxiety Management</span>
-                                            <span class="theme-tag">Self-Care</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="summary-section">
-                                        <h4>📅 Daily Entries</h4>
-                                        <div class="daily-entries" id="dailyChatEntries"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div id="chatHistory" style="display: none;">
-                            <div class="chat-summary-card">
-                                <h4 style="margin-bottom: 20px;">Previous Chat Summaries</h4>
-                                <div id="historicalSummaries"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div id="notes" class="tab-content">
-                        <div class="add-note-section">
-                            <h3>✍️ New Session Note</h3>
-                            <textarea id="noteInput" placeholder="Write your session notes here..."></textarea>
-                            <div class="button-group">
-                                <button class="btn btn-primary" onclick="saveNote()">
-                                    <span>💾</span>
-                                    <span>Save Note</span>
-                                </button>
-                                <button class="btn btn-audio" id="audioBtn" onclick="toggleAudio()">
-                                    <span>🎤</span>
-                                    <span>Start Recording</span>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="insights-section">
-                            <h3>📚 Previous Session Notes</h3>
-                            <div id="sessionNotes"></div>
-                        </div>
-                    </div>
-                    
-                    <div id="visualization" class="tab-content">
-                        <div class="chart-container">
-                            <h3>📈 Mood Trend (Last 30 Days)</h3>
-                            <canvas id="moodChart"></canvas>
-                        </div>
-                        
-                        <div class="chart-container">
-                            <h3>📊 Session Progress Over Time</h3>
-                            <canvas id="progressChart"></canvas>
-                        </div>
-                        
-                        <div class="chart-container">
-                            <h3>💬 Chat Activity vs Mood Correlation</h3>
-                            <canvas id="correlationChart"></canvas>
-                        </div>
-                    </div>
-                    
-                    <div id="logs" class="tab-content">
-                        <div class="insights-section">
-                            <h3>📅 Daily Mood Calendar</h3>
-                            <div class="calendar" id="moodCalendar"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
-    </div>
+      </section>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-        import { getFirestore, collection, getDocs, addDoc, doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+      <section class="section">
+        <div class="container text-center">
+          <p class="eyebrow">What I do</p>
+          <h2>Supercharging teams with practical AI</h2>
+          <p class="lead lead-center">
+            Built for founders and operators who need clear scope, fast prototypes,
+            and systems your team can maintain after the engagement ends.
+          </p>
+          <div class="cards-3">
+            <article class="card">
+              <div class="card-icon">◆</div>
+              <h3>LLM use cases</h3>
+              <p>
+                Chatbots, copilots, knowledge search, and internal tools — scoped
+                and shipped with evaluation and guardrails.
+              </p>
+            </article>
+            <article class="card">
+              <div class="card-icon">◇</div>
+              <h3>Analytics</h3>
+              <p>
+                Turn messy data into dashboards and reports that leadership
+                actually uses for weekly decisions.
+              </p>
+            </article>
+            <article class="card">
+              <div class="card-icon">○</div>
+              <h3>Forecasting</h3>
+              <p>
+                Time-series models and scenario planning so you can staff, budget,
+                and plan with confidence ranges.
+              </p>
+            </article>
+          </div>
+          <p style="margin-top:40px">
+            <a href="services.html" class="btn btn-outline">Explore all services →</a>
+          </p>
+        </div>
+      </section>
 
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
+      <section class="section section-muted">
+        <div class="container">
+          <div class="feature-block">
+            <div class="feature-copy">
+              <p class="eyebrow">Mandate intelligence</p>
+              <h2>From idea to prototype in weeks, not quarters</h2>
+              <p>
+                Most AI projects stall at “what should we build?” I run focused
+                discovery sessions, pick 1–3 high-leverage use cases, and deliver a
+                working proof of concept your stakeholders can try.
+              </p>
+              <ul class="feature-list">
+                <li>Use-case discovery workshops</li>
+                <li>Model and vendor selection</li>
+                <li>2–4 week quick-win delivery</li>
+              </ul>
+            </div>
+            <div class="feature-visual">
+              <div class="stat-grid">
+                <div class="stat-card">
+                  <strong>2–4</strong>
+                  <span>weeks to first demo</span>
+                </div>
+                <div class="stat-card">
+                  <strong>1–3</strong>
+                  <span>prioritized use cases</span>
+                </div>
+                <div class="stat-card">
+                  <strong>100%</strong>
+                  <span>handoff documentation</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+      <section class="section">
+        <div class="container text-center">
+          <p class="eyebrow">Stack & tools</p>
+          <h2>Works with the tools you already use</h2>
+          <p class="lead lead-center">
+            OpenAI, Anthropic, Azure, AWS, Python, SQL, Streamlit, Power BI,
+            and your existing data warehouse or spreadsheets.
+          </p>
+          <div class="logo-strip">
+            <span class="logo-pill">OpenAI</span>
+            <span class="logo-pill">Anthropic</span>
+            <span class="logo-pill">Python</span>
+            <span class="logo-pill">SQL</span>
+            <span class="logo-pill">Power BI</span>
+            <span class="logo-pill">AWS / Azure</span>
+          </div>
+        </div>
+      </section>
 
-        let clients = [];
-        let currentClient = null;
-        let isRecording = false;
-        let recognition = null;
-        let charts = { mood: null, progress: null, correlation: null, miniSession: null, miniMood: null };
+      <div class="cta-band">
+        <h2>Ready to explore what AI can do for your team?</h2>
+        <p>
+          Book a free 30-minute consult. We'll map your goals, constraints, and
+          the fastest path to a measurable win.
+        </p>
+        <a href="contact.html" class="btn btn-primary btn-lg">Get in touch</a>
+      </div>
+    </main>
 
-        if ('webkitSpeechRecognition' in window) {
-            recognition = new webkitSpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            
-            recognition.onresult = (event) => {
-                let transcript = '';
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    transcript += event.results[i][0].transcript;
-                }
-                document.getElementById('noteInput').value = transcript;
-            };
-        }
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <a href="index.html" class="brand">
+              <span class="brand-icon">JG</span>
+              Jeel AI Consulting
+            </a>
+            <p>
+              Independent consulting for LLM products, analytics, and forecasting.
+            </p>
+          </div>
+          <div class="footer-col">
+            <h4>Pages</h4>
+            <a href="index.html">Home</a>
+            <a href="services.html">Services</a>
+            <a href="about.html">About</a>
+            <a href="contact.html">Contact</a>
+          </div>
+          <div class="footer-col">
+            <h4>Contact</h4>
+            <a href="mailto:jeelgondaliya@gmail.com">jeelgondaliya@gmail.com</a>
+            <a href="tel:+917828820453">+91 78288 20453</a>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>© <span id="year"></span> Jeel Gondaliya</span>
+          <span>LLM · Analytics · Forecasting</span>
+        </div>
+      </div>
+    </footer>
 
-        async function loadClients() {
-            console.log("🔍 Attempting to load clients from Firebase...");
-            
-            try {
-                const clientsRef = collection(db, 'clients');
-                console.log("✅ Connected to 'clients' collection");
-                
-                const querySnapshot = await getDocs(clientsRef);
-                console.log(`📊 Found ${querySnapshot.size} documents in Firebase`);
-                
-                clients = [];
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    
-                    const clientData = {
-                        id: doc.id,
-                        name: data.name || "Unnamed Client",
-                        nextSession: data.nextSession || new Date().toISOString().split('T')[0],
-                        summary: data.summary || {
-                            recentProgress: "No progress notes yet.",
-                            keyThemes: [],
-                            treatmentFocus: "To be determined"
-                        },
-                        notes: data.notes || [],
-                        moodData: data.moodData || [],
-                        chatSummaries: data.chatSummaries || []
-                    };
-                    
-                    console.log("📄 Client loaded:", clientData.name, clientData);
-                    clients.push(clientData);
-                });
-                
-                clients.sort((a, b) => a.name.localeCompare(b.name));
-                
-                if (clients.length === 0) {
-                    console.log("⚠️ No clients found in Firebase. Loading demo data...");
-                    clients = getDemoClients();
-                    //alert("No clients found in Firebase. Showing demo data.\n\nPlease check:\n1. Firebase config is correct\n2. You have added documents to the 'clients' collection\n3. Firestore rules allow reading");
-                } else {
-                    console.log(`✅ Successfully loaded ${clients.length} clients from Firebase`);
-                }
-                
-                renderClientList();
-            } catch (error) {
-                console.error("❌ Error loading clients:", error);
-                console.error("Error details:", error.message);
-                
-                alert(`❌ Firebase Error: ${error.message}\n\nCheck the browser console (F12) for details.\n\nLoading demo data instead.`);
-                
-                clients = getDemoClients();
-                renderClientList();
-            }
-        }
-
-        function getDemoClients() {
-            return [
-                {
-                    id: '1',
-                    name: 'Sarah Johnson',
-                    nextSession: '2025-10-12',
-                    summary: {
-                        recentProgress: 'Significant improvement in anxiety management. Sarah has been practicing mindfulness techniques daily.',
-                        keyThemes: ['Anxiety Management', 'Work-Life Balance', 'Self-Care', 'Mindfulness'],
-                        treatmentFocus: 'Continue CBT techniques for managing work-related stress.'
-                    },
-                    notes: [
-                        { date: '2025-10-04', content: 'Sarah reported a productive week. Successfully used breathing techniques during a stressful presentation.' },
-                        { date: '2025-09-27', content: 'Continued work on cognitive restructuring. Sarah identified negative thought patterns.' }
-                    ],
-                    moodData: generateMoodData(30, 6, 9),
-                    chatSummaries: [
-                        {
-                            period: 'Oct 4 - Oct 11, 2025',
-                            messageCount: 45,
-                            sentiment: 'positive',
-                            overallSummary: 'Patient has been actively engaging, discussing daily stressors and practicing coping techniques. Notable improvement in emotional regulation.',
-                            keyTopics: ['Work Stress', 'Sleep Quality', 'Anxiety Management', 'Self-Care'],
-                            dailyEntries: [
-                                { date: '2025-10-11', mood: '😊', summary: 'Had a great day at work. Used breathing exercises before big meeting - worked perfectly!' },
-                                { date: '2025-10-10', mood: '😌', summary: 'Feeling more balanced. Practiced yoga in the morning, felt calm throughout the day.' },
-                                { date: '2025-10-09', mood: '🙂', summary: 'Moderate anxiety about upcoming project deadline. Talked through worries with AI.' },
-                                { date: '2025-10-08', mood: '😊', summary: 'Good sleep last night. Feeling energized and optimistic about the week ahead.' }
-                            ]
-                        },
-                        {
-                            period: 'Sep 27 - Oct 3, 2025',
-                            messageCount: 38,
-                            sentiment: 'neutral',
-                            overallSummary: 'Patient working through challenging week at work. Discussed strategies for managing stress and maintaining boundaries. Some difficulty with sleep mid-week but improved by weekend.',
-                            keyTopics: ['Work Boundaries', 'Sleep Issues', 'Stress Management', 'Time Management'],
-                            dailyEntries: [
-                                { date: '2025-10-03', mood: '😌', summary: 'Weekend helped reset. Spent time outdoors and felt much more relaxed.' },
-                                { date: '2025-10-02', mood: '🙂', summary: 'Starting to feel better. Implemented new boundary at work - said no to extra project.' },
-                                { date: '2025-10-01', mood: '😟', summary: 'Rough day. Boss added more to my plate. Felt overwhelmed but talked it through.' },
-                                { date: '2025-09-30', mood: '😐', summary: 'Sleep was difficult again. Racing thoughts about work deadlines.' },
-                                { date: '2025-09-29', mood: '🙂', summary: 'Better day. Used grounding technique when anxiety started rising.' }
-                            ]
-                        },
-                        {
-                            period: 'Sep 20 - Sep 26, 2025',
-                            messageCount: 29,
-                            sentiment: 'positive',
-                            overallSummary: 'Good progress this week. Patient practiced new cognitive techniques daily and reported feeling more in control. Started journaling practice as discussed in therapy session.',
-                            keyTopics: ['Journaling', 'Cognitive Techniques', 'Morning Routine', 'Positive Thinking'],
-                            dailyEntries: [
-                                { date: '2025-09-26', mood: '😊', summary: 'Great week overall! Journaling every morning is really helping me process thoughts.' },
-                                { date: '2025-09-25', mood: '😊', summary: 'Caught myself in negative thought pattern and successfully reframed it!' },
-                                { date: '2025-09-24', mood: '🙂', summary: 'Consistent with morning routine. Starting to feel like a habit now.' }
-                            ]
-                        },
-                        {
-                            period: 'Sep 13 - Sep 19, 2025',
-                            messageCount: 22,
-                            sentiment: 'neutral',
-                            overallSummary: 'Patient adjusting to new techniques. Some resistance to change noted early in week but improved engagement toward end. Discussed importance of consistency and self-compassion.',
-                            keyTopics: ['Self-Compassion', 'Resistance to Change', 'Building Habits', 'Patience'],
-                            dailyEntries: [
-                                { date: '2025-09-19', mood: '🙂', summary: 'Feeling more open to trying new approaches. Progress takes time.' },
-                                { date: '2025-09-18', mood: '😐', summary: 'Frustrated that techniques aren\'t working instantly. Need to be patient with myself.' },
-                                { date: '2025-09-17', mood: '😟', summary: 'Hard day. Doubting whether therapy is helping. Talked through these feelings.' }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    id: '2',
-                    name: 'Michael Chen',
-                    nextSession: '2025-10-13',
-                    summary: {
-                        recentProgress: 'Michael is making steady progress addressing depression symptoms. Started exercising regularly.',
-                        keyThemes: ['Depression', 'Exercise Routine', 'Social Connection', 'Sleep Hygiene'],
-                        treatmentFocus: 'Support continued sobriety and behavioral activation.'
-                    },
-                    notes: [
-                        { date: '2025-10-06', content: 'Michael attended first group exercise class. Reported feeling proud.' }
-                    ],
-                    moodData: generateMoodData(30, 4, 7),
-                    chatSummaries: [
-                        {
-                            period: 'Oct 6 - Oct 13, 2025',
-                            messageCount: 32,
-                            sentiment: 'neutral',
-                            overallSummary: 'Patient is working on building routine. Some difficult days but showing resilience and commitment to progress.',
-                            keyTopics: ['Exercise', 'Motivation', 'Social Anxiety', 'Daily Routine'],
-                            dailyEntries: [
-                                { date: '2025-10-11', mood: '😐', summary: 'Skipped gym today, feeling a bit down. Talked about self-compassion.' },
-                                { date: '2025-10-10', mood: '🙂', summary: 'Went to the gym for the third time this week! Starting to feel stronger.' },
-                                { date: '2025-10-09', mood: '🙂', summary: 'Met someone at the gym today. Had a brief conversation - felt good.' },
-                                { date: '2025-10-08', mood: '😐', summary: 'Low energy day. Pushed through and did a light workout anyway.' }
-                            ]
-                        },
-                        {
-                            period: 'Sep 29 - Oct 5, 2025',
-                            messageCount: 26,
-                            sentiment: 'positive',
-                            overallSummary: 'Breakthrough week for Michael. Started new exercise routine and noticed immediate mood improvements. Sleep quality improving with consistent schedule.',
-                            keyTopics: ['New Beginnings', 'Exercise Benefits', 'Sleep Quality', 'Motivation'],
-                            dailyEntries: [
-                                { date: '2025-10-05', mood: '😊', summary: 'Best sleep in weeks! Exercise is really making a difference.' },
-                                { date: '2025-10-04', mood: '🙂', summary: 'Second gym visit this week. Feeling proud of myself for following through.' },
-                                { date: '2025-10-03', mood: '🙂', summary: 'Went to the gym for the first time. It was scary but I did it!' }
-                            ]
-                        },
-                        {
-                            period: 'Sep 22 - Sep 28, 2025',
-                            messageCount: 18,
-                            sentiment: 'neutral',
-                            overallSummary: 'Patient expressing desire to make changes but struggling with motivation. Discussed small achievable goals and breaking down larger tasks.',
-                            keyTopics: ['Motivation', 'Small Goals', 'Depression', 'Self-Care'],
-                            dailyEntries: [
-                                { date: '2025-09-28', mood: '😐', summary: 'Still finding it hard to get out of bed. Baby steps.' },
-                                { date: '2025-09-27', mood: '😐', summary: 'Researched gyms in my area. Maybe that\'s a start?' }
-                            ]
-                        }
-                    ]
-                }
-            ];
-        }
-
-        function generateMoodData(days, minMood, maxMood) {
-            const moods = [];
-            const emojis = ['😢', '😟', '😐', '🙂', '😊', '😃', '😄'];
-            
-            for (let i = 0; i < days; i++) {
-                const date = new Date();
-                date.setDate(date.getDate() - (days - 1 - i));
-                
-                const mood = Math.floor(Math.random() * (maxMood - minMood + 1)) + minMood;
-                const emoji = emojis[Math.min(mood - 1, emojis.length - 1)];
-                
-                moods.push({
-                    date: date.toISOString().split('T')[0],
-                    mood: mood,
-                    emoji: emoji
-                });
-            }
-            
-            return moods;
-        }
-
-        function renderClientList(filter = '') {
-            const clientList = document.getElementById('clientList');
-            clientList.innerHTML = '';
-            
-            const filteredClients = clients.filter(client => 
-                client.name.toLowerCase().includes(filter.toLowerCase())
-            );
-            
-            filteredClients.forEach(client => {
-                const li = document.createElement('li');
-                li.className = 'client-item';
-                li.innerHTML = `
-                    <div class="client-name">${client.name}</div>
-                    <div class="client-next-session">📅 ${new Date(client.nextSession).toLocaleDateString()}</div>
-                `;
-                li.onclick = () => selectClient(client);
-                clientList.appendChild(li);
-            });
-        }
-
-        function selectClient(client) {
-            currentClient = client;
-            document.getElementById('welcomeScreen').style.display = 'none';
-            document.getElementById('clientContent').style.display = 'block';
-            
-            document.querySelectorAll('.client-item').forEach(item => item.classList.remove('active'));
-            event.target.closest('.client-item').classList.add('active');
-            
-            document.getElementById('clientName').textContent = client.name;
-            
-            checkAppointmentReminder();
-            renderSummary();
-            renderNotes();
-            renderCalendar();
-            renderChatSummary();
-            
-            switchTab('summary');
-        }
-
-        function checkAppointmentReminder() {
-            const reminderDiv = document.getElementById('appointmentReminder');
-            const nextSession = new Date(currentClient.nextSession);
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            
-            if (nextSession.toDateString() === tomorrow.toDateString()) {
-                const chatSummary = currentClient.chatSummaries && currentClient.chatSummaries.length > 0 
-                    ? currentClient.chatSummaries[0].overallSummary 
-                    : 'No recent chat activity';
-                    
-                reminderDiv.innerHTML = `
-                    <div class="appointment-reminder">
-                        <div class="reminder-title">Appointment Tomorrow</div>
-                        <p><strong>${currentClient.name}</strong> - ${nextSession.toLocaleTimeString()}</p>
-                        <p style="margin-top: 12px;"><strong>Quick Prep:</strong> ${currentClient.summary.recentProgress}</p>
-                        <p style="margin-top: 8px;"><strong>Recent Chat Activity:</strong> ${chatSummary}</p>
-                    </div>
-                `;
-            } else {
-                reminderDiv.innerHTML = '';
-            }
-        }
-
-        function renderSummary() {
-            const nextDate = new Date(currentClient.nextSession);
-            document.getElementById('nextSessionDate').textContent = nextDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            document.getElementById('nextSessionTime').textContent = nextDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-            
-            const chatCount = currentClient.chatSummaries && currentClient.chatSummaries.length > 0 
-                ? currentClient.chatSummaries[0].messageCount 
-                : 0;
-            document.getElementById('chatMessageCount').textContent = chatCount;
-            
-            if (currentClient.notes && currentClient.notes.length > 0) {
-                document.getElementById('lastSessionDate').textContent = new Date(currentClient.notes[0].date).toLocaleDateString();
-                document.getElementById('sessionInsight').textContent = currentClient.notes[0].content.substring(0, 150) + '...';
-            }
-            
-            const chatInsight = currentClient.chatSummaries && currentClient.chatSummaries.length > 0 
-                ? currentClient.chatSummaries[0].overallSummary 
-                : 'No recent chat activity between sessions.';
-            document.getElementById('chatInsight').textContent = chatInsight;
-            
-            const themesDiv = document.getElementById('keyThemes');
-            themesDiv.innerHTML = '';
-            currentClient.summary.keyThemes.forEach(theme => {
-                const tag = document.createElement('div');
-                tag.className = 'theme-tag';
-                tag.textContent = theme;
-                themesDiv.appendChild(tag);
-            });
-            
-            setTimeout(() => renderMiniCharts(), 100);
-        }
-
-        function renderMiniCharts() {
-            if (charts.miniSession) charts.miniSession.destroy();
-            if (charts.miniMood) charts.miniMood.destroy();
-            
-            const sessionCtx = document.getElementById('miniSessionChart').getContext('2d');
-            charts.miniSession = new Chart(sessionCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-                    datasets: [{
-                        data: [6.5, 7.0, 7.5, 7.8],
-                        borderColor: '#8b5cf6',
-                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                        tension: 0.4,
-                        fill: true,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#8b5cf6'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { 
-                            beginAtZero: true, 
-                            max: 10,
-                            grid: { color: 'rgba(139, 92, 246, 0.1)' },
-                            ticks: { color: '#9ca3af' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#9ca3af' }
-                        }
-                    }
-                }
-            });
-            
-            const moodCtx = document.getElementById('miniMoodChart').getContext('2d');
-            const last7Days = currentClient.moodData.slice(-7);
-            charts.miniMood = new Chart(moodCtx, {
-                type: 'bar',
-                data: {
-                    labels: last7Days.map(d => new Date(d.date).toLocaleDateString('en-US', { weekday: 'short' })),
-                    datasets: [{
-                        data: last7Days.map(d => d.mood),
-                        backgroundColor: '#6366f1',
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { 
-                            beginAtZero: true, 
-                            max: 10,
-                            grid: { color: 'rgba(139, 92, 246, 0.1)' },
-                            ticks: { color: '#9ca3af' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#9ca3af' }
-                        }
-                    }
-                }
-            });
-        }
-
-        function renderChatSummary() {
-            if (!currentClient.chatSummaries || currentClient.chatSummaries.length === 0) {
-                document.getElementById('chatOverallSummary').textContent = 'No chat activity recorded yet.';
-                document.getElementById('dailyChatEntries').innerHTML = '<p style="color: #9ca3af; text-align: center; padding: 40px;">No daily entries available</p>';
-                return;
-            }
-            
-            const summary = currentClient.chatSummaries[0];
-            document.getElementById('chatPeriod').textContent = summary.period;
-            document.getElementById('chatCount').textContent = `${summary.messageCount} messages exchanged`;
-            document.getElementById('chatOverallSummary').textContent = summary.overallSummary;
-            
-            const dailyEntriesDiv = document.getElementById('dailyChatEntries');
-            dailyEntriesDiv.innerHTML = '';
-            
-            if (summary.dailyEntries) {
-                summary.dailyEntries.forEach(entry => {
-                    const entryDiv = document.createElement('div');
-                    entryDiv.className = 'daily-entry';
-                    entryDiv.innerHTML = `
-                        <div class="daily-entry-header">
-                            <div class="daily-date">${new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
-                            <div class="mood-emoji">${entry.mood}</div>
-                        </div>
-                        <div class="daily-summary">${entry.summary}</div>
-                    `;
-                    dailyEntriesDiv.appendChild(entryDiv);
-                });
-            }
-        }
-
-        window.loadChatSummary = function(period) {
-            document.querySelectorAll('.date-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            document.getElementById('currentChatSummary').style.display = 'block';
-            document.getElementById('chatHistory').style.display = 'none';
-            
-            if (!currentClient.chatSummaries || currentClient.chatSummaries.length === 0) {
-                document.getElementById('chatOverallSummary').textContent = 'No chat activity recorded yet.';
-                document.getElementById('dailyChatEntries').innerHTML = '<p style="color: #9ca3af; text-align: center; padding: 40px;">No daily entries available</p>';
-                return;
-            }
-            
-            let summaryIndex = 0;
-            if (period === 'previous' && currentClient.chatSummaries.length > 1) {
-                summaryIndex = 1;
-            }
-            
-            const summary = currentClient.chatSummaries[summaryIndex];
-            
-            document.getElementById('chatPeriod').textContent = summary.period;
-            document.getElementById('chatCount').textContent = `${summary.messageCount} messages exchanged`;
-            document.getElementById('chatOverallSummary').textContent = summary.overallSummary;
-            
-            // Update key topics
-            const chatSummaryCard = document.querySelector('#currentChatSummary .chat-summary-card');
-            const keyTopicsSection = chatSummaryCard.querySelector('.summary-section:nth-child(2) .key-themes');
-            keyTopicsSection.innerHTML = '';
-            summary.keyTopics.forEach(topic => {
-                const tag = document.createElement('span');
-                tag.className = 'theme-tag';
-                tag.textContent = topic;
-                keyTopicsSection.appendChild(tag);
-            });
-            
-            // Update sentiment indicator
-            const sentimentDot = document.querySelector('.sentiment-dot');
-            const sentimentText = sentimentDot.nextElementSibling;
-            sentimentDot.className = 'sentiment-dot';
-            
-            if (summary.sentiment === 'positive') {
-                sentimentDot.classList.add('positive');
-                sentimentText.textContent = 'Positive trend';
-                sentimentText.style.color = '#4ade80';
-            } else if (summary.sentiment === 'negative') {
-                sentimentDot.classList.add('negative');
-                sentimentText.textContent = 'Needs attention';
-                sentimentText.style.color = '#f87171';
-            } else {
-                sentimentDot.classList.add('neutral');
-                sentimentText.textContent = 'Neutral trend';
-                sentimentText.style.color = '#fbbf24';
-            }
-            
-            const dailyEntriesDiv = document.getElementById('dailyChatEntries');
-            dailyEntriesDiv.innerHTML = '';
-            
-            if (summary.dailyEntries && summary.dailyEntries.length > 0) {
-                summary.dailyEntries.forEach(entry => {
-                    const entryDiv = document.createElement('div');
-                    entryDiv.className = 'daily-entry';
-                    entryDiv.innerHTML = `
-                        <div class="daily-entry-header">
-                            <div class="daily-date">${new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
-                            <div class="mood-emoji">${entry.mood}</div>
-                        </div>
-                        <div class="daily-summary">${entry.summary}</div>
-                    `;
-                    dailyEntriesDiv.appendChild(entryDiv);
-                });
-            } else {
-                dailyEntriesDiv.innerHTML = '<p style="color: #9ca3af; text-align: center; padding: 40px;">No daily entries for this period</p>';
-            }
-        }
-
-        window.showChatHistory = function() {
-            document.querySelectorAll('.date-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            document.getElementById('currentChatSummary').style.display = 'none';
-            document.getElementById('chatHistory').style.display = 'block';
-            
-            const historicalDiv = document.getElementById('historicalSummaries');
-            historicalDiv.innerHTML = '';
-            
-            if (currentClient.chatSummaries && currentClient.chatSummaries.length > 0) {
-                currentClient.chatSummaries.forEach((summary, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'session-note';
-                    card.style.cursor = 'pointer';
-                    card.innerHTML = `
-                        <div class="session-header">
-                            <div class="session-date">${summary.period}</div>
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <div style="font-size: 13px; color: #9ca3af;">${summary.messageCount} messages</div>
-                                <div class="sentiment-indicator">
-                                    <span class="sentiment-dot ${summary.sentiment}"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="note-content" style="margin-bottom: 12px;">${summary.overallSummary}</div>
-                        <div class="key-themes" style="margin-top: 12px;">
-                            ${summary.keyTopics.map(topic => `<span class="theme-tag" style="font-size: 11px; padding: 6px 12px;">${topic}</span>`).join('')}
-                        </div>
-                        ${summary.dailyEntries && summary.dailyEntries.length > 0 ? `
-                            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(139, 92, 246, 0.1);">
-                                <div style="font-size: 13px; color: #9ca3af; margin-bottom: 8px;">Daily Highlights:</div>
-                                ${summary.dailyEntries.slice(0, 3).map(entry => `
-                                    <div style="font-size: 12px; color: #d1d5db; margin-bottom: 4px;">
-                                        <span style="color: #8b5cf6;">${new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>: ${entry.mood} ${entry.summary.substring(0, 80)}${entry.summary.length > 80 ? '...' : ''}
-                                    </div>
-                                `).join('')}
-                            </div>
-                        ` : ''}
-                    `;
-                    
-                    card.onclick = () => {
-                        // Switch back to showing this specific summary
-                        document.querySelector('.date-btn:first-child').classList.add('active');
-                        loadChatSummaryByIndex(index);
-                    };
-                    
-                    historicalDiv.appendChild(card);
-                });
-            } else {
-                historicalDiv.innerHTML = '<p style="color: #9ca3af; text-align: center; padding: 40px;">No chat summaries available</p>';
-            }
-        }
-        
-        function loadChatSummaryByIndex(index) {
-            document.getElementById('currentChatSummary').style.display = 'block';
-            document.getElementById('chatHistory').style.display = 'none';
-            
-            const summary = currentClient.chatSummaries[index];
-            
-            document.getElementById('chatPeriod').textContent = summary.period;
-            document.getElementById('chatCount').textContent = `${summary.messageCount} messages exchanged`;
-            document.getElementById('chatOverallSummary').textContent = summary.overallSummary;
-            
-            const chatSummaryCard = document.querySelector('#currentChatSummary .chat-summary-card');
-            const keyTopicsSection = chatSummaryCard.querySelector('.summary-section:nth-child(2) .key-themes');
-            keyTopicsSection.innerHTML = '';
-            summary.keyTopics.forEach(topic => {
-                const tag = document.createElement('span');
-                tag.className = 'theme-tag';
-                tag.textContent = topic;
-                keyTopicsSection.appendChild(tag);
-            });
-            
-            const sentimentDot = document.querySelector('.sentiment-dot');
-            const sentimentText = sentimentDot.nextElementSibling;
-            sentimentDot.className = 'sentiment-dot';
-            
-            if (summary.sentiment === 'positive') {
-                sentimentText.textContent = 'Positive trend';
-                sentimentText.style.color = '#4ade80';
-            } else if (summary.sentiment === 'negative') {
-                sentimentDot.classList.add('negative');
-                sentimentText.textContent = 'Needs attention';
-                sentimentText.style.color = '#f87171';
-            } else {
-                sentimentDot.classList.add('neutral');
-                sentimentText.textContent = 'Neutral trend';
-                sentimentText.style.color = '#fbbf24';
-            }
-            
-            const dailyEntriesDiv = document.getElementById('dailyChatEntries');
-            dailyEntriesDiv.innerHTML = '';
-            
-            if (summary.dailyEntries && summary.dailyEntries.length > 0) {
-                summary.dailyEntries.forEach(entry => {
-                    const entryDiv = document.createElement('div');
-                    entryDiv.className = 'daily-entry';
-                    entryDiv.innerHTML = `
-                        <div class="daily-entry-header">
-                            <div class="daily-date">${new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
-                            <div class="mood-emoji">${entry.mood}</div>
-                        </div>
-                        <div class="daily-summary">${entry.summary}</div>
-                    `;
-                    dailyEntriesDiv.appendChild(entryDiv);
-                });
-            }
-        }
-
-        function renderNotes() {
-            const notesDiv = document.getElementById('sessionNotes');
-            notesDiv.innerHTML = '';
-            
-            if (!currentClient.notes || currentClient.notes.length === 0) {
-                notesDiv.innerHTML = '<p style="color: #9ca3af; text-align: center; padding: 40px;">No session notes yet</p>';
-                return;
-            }
-            
-            currentClient.notes.forEach(note => {
-                const noteDiv = document.createElement('div');
-                noteDiv.className = 'session-note';
-                noteDiv.innerHTML = `
-                    <div class="session-header">
-                        <div class="session-date">${new Date(note.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</div>
-                    </div>
-                    <div class="note-content">${note.content}</div>
-                `;
-                notesDiv.appendChild(noteDiv);
-            });
-        }
-
-        function renderCalendar() {
-            const calendarDiv = document.getElementById('moodCalendar');
-            calendarDiv.innerHTML = '';
-            
-            const last7Days = currentClient.moodData.slice(-7);
-            
-            last7Days.forEach(day => {
-                const dayDiv = document.createElement('div');
-                dayDiv.className = 'calendar-day has-data';
-                dayDiv.innerHTML = `
-                    <div class="day-label">${new Date(day.date).toLocaleDateString('en-US', {weekday: 'short'})}</div>
-                    <div class="day-mood">${day.emoji}</div>
-                    <div class="day-date">${new Date(day.date).getDate()}</div>
-                `;
-                calendarDiv.appendChild(dayDiv);
-            });
-        }
-
-        window.switchTab = function(tabName) {
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(tabName).classList.add('active');
-            
-            if (tabName === 'visualization' && currentClient) {
-                setTimeout(() => renderCharts(), 100);
-            }
-        }
-
-        function renderCharts() {
-            if (charts.mood) charts.mood.destroy();
-            const moodCtx = document.getElementById('moodChart').getContext('2d');
-            charts.mood = new Chart(moodCtx, {
-                type: 'line',
-                data: {
-                    labels: currentClient.moodData.map(d => new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
-                    datasets: [{
-                        label: 'Mood Score',
-                        data: currentClient.moodData.map(d => d.mood),
-                        borderColor: '#8b5cf6',
-                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                        tension: 0.4,
-                        fill: true,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#8b5cf6'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { labels: { color: '#e4e4e7' } }
-                    },
-                    scales: {
-                        y: { 
-                            beginAtZero: true, 
-                            max: 10,
-                            grid: { color: 'rgba(139, 92, 246, 0.1)' },
-                            ticks: { color: '#9ca3af' }
-                        },
-                        x: {
-                            grid: { color: 'rgba(139, 92, 246, 0.05)' },
-                            ticks: { color: '#9ca3af' }
-                        }
-                    }
-                }
-            });
-
-            if (charts.progress) charts.progress.destroy();
-            const progressCtx = document.getElementById('progressChart').getContext('2d');
-            charts.progress = new Chart(progressCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-                    datasets: [{
-                        label: 'Progress Score',
-                        data: [6.5, 7.0, 7.5, 7.8],
-                        backgroundColor: '#8b5cf6',
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { labels: { color: '#e4e4e7' } }
-                    },
-                    scales: {
-                        y: { 
-                            beginAtZero: true, 
-                            max: 10,
-                            grid: { color: 'rgba(139, 92, 246, 0.1)' },
-                            ticks: { color: '#9ca3af' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#9ca3af' }
-                        }
-                    }
-                }
-            });
-
-            if (charts.correlation) charts.correlation.destroy();
-            const correlationCtx = document.getElementById('correlationChart').getContext('2d');
-            
-            const chatActivity = [5, 8, 12, 6, 10, 15, 8];
-            const moodScores = currentClient.moodData.slice(-7).map(d => d.mood);
-            
-            charts.correlation = new Chart(correlationCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                    datasets: [
-                        {
-                            label: 'Chat Messages',
-                            data: chatActivity,
-                            borderColor: '#6366f1',
-                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                            tension: 0.4,
-                            yAxisID: 'y',
-                        },
-                        {
-                            label: 'Mood Score',
-                            data: moodScores,
-                            borderColor: '#8b5cf6',
-                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                            tension: 0.4,
-                            yAxisID: 'y1',
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false,
-                    },
-                    plugins: {
-                        legend: { labels: { color: '#e4e4e7' } }
-                    },
-                    scales: {
-                        y: {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                            title: { display: true, text: 'Messages', color: '#9ca3af' },
-                            grid: { color: 'rgba(139, 92, 246, 0.1)' },
-                            ticks: { color: '#9ca3af' }
-                        },
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            title: { display: true, text: 'Mood', color: '#9ca3af' },
-                            grid: { drawOnChartArea: false },
-                            ticks: { color: '#9ca3af' },
-                            max: 10
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#9ca3af' }
-                        }
-                    }
-                }
-            });
-        }
-
-        window.saveNote = async function() {
-            const noteContent = document.getElementById('noteInput').value;
-            if (!noteContent || !currentClient) return;
-            
-            const newNote = {
-                date: new Date().toISOString().split('T')[0],
-                content: noteContent
-            };
-            
-            currentClient.notes.unshift(newNote);
-            
-            try {
-                const clientRef = doc(db, 'clients', currentClient.id);
-                await updateDoc(clientRef, {
-                    notes: currentClient.notes
-                });
-            } catch (error) {
-                console.log("Demo mode - note saved locally");
-            }
-            
-            document.getElementById('noteInput').value = '';
-            renderNotes();
-            alert('✅ Note saved successfully!');
-        }
-
-        window.toggleAudio = function() {
-            if (!recognition) {
-                alert('Speech recognition is not supported in your browser. Please use Chrome.');
-                return;
-            }
-            
-            const audioBtn = document.getElementById('audioBtn');
-            
-            if (!isRecording) {
-                recognition.start();
-                isRecording = true;
-                audioBtn.innerHTML = '<span>⏹️</span><span>Stop Recording</span>';
-                audioBtn.classList.add('recording');
-            } else {
-                recognition.stop();
-                isRecording = false;
-                audioBtn.innerHTML = '<span>🎤</span><span>Start Recording</span>';
-                audioBtn.classList.remove('recording');
-            }
-        }
-
-        document.getElementById('searchBox').addEventListener('input', (e) => {
-            renderClientList(e.target.value);
-        });
-
-        loadClients();
-    </script>
-</body>
+    <script src="script.js"></script>
+  </body>
 </html>
