@@ -38,12 +38,12 @@ document.addEventListener("DOMContentLoaded", () => {
           statusEl.classList.add("success");
         } else {
           statusEl.textContent =
-            "Something went wrong. Please email jeelgondaliya@gmail.com directly.";
+            "Something went wrong. Please email binarylogiqinfo@gmail.com directly.";
           statusEl.classList.add("error");
         }
       } catch {
         statusEl.textContent =
-          "Network error. Please email jeelgondaliya@gmail.com directly.";
+          "Network error. Please email binarylogiqinfo@gmail.com directly.";
         statusEl.classList.add("error");
       }
     });
